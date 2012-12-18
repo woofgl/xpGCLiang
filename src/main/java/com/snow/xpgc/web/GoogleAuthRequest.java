@@ -27,8 +27,6 @@ import static org.scribe.model.OAuthConstants.EMPTY_TOKEN;
 @Singleton
 public class GoogleAuthRequest implements AuthRequest {
     public static final String TOKEN = "google_token";
-    @Inject
-    ContactsUtils contactsUtils;
 
     private static Logger log = LoggerFactory.getLogger(GoogleAuthRequest.class);
     private final OAuthService googleService;
@@ -86,11 +84,10 @@ public class GoogleAuthRequest implements AuthRequest {
             Token accessToken = googleService.getAccessToken(EMPTY_TOKEN, verifier);
             if (accessToken.getToken() != null) {
                 rc.setCookie(TOKEN, accessToken.getToken());
-                //test
-                List<ContactEntry> list = contactsUtils.setToken(accessToken.getToken()).getContactResults();
-                System.out.println("ok");
+                rc.getRes().sendRedirect(rc.getReq().getContextPath());
+            }else{
+                googleLogin(rc);
             }
-            //SSLUtilities.trustAllHttpsCertificates();
 
         }
     }

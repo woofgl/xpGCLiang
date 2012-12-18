@@ -67,27 +67,29 @@ var app = app || {};
         return dfd.promise();
     };
 
-    app.getEmails = function () {
+    app.getContacts = function () {
         var params = {
             method:"Get"
         };
-        return app.getJsonData(contextPath + "/getEmails.json", params);
+        return app.getJsonData(contextPath + "/googleContacts.json", params);
     };
 
-    app.getRepositories = function (opts) {
+    app.getGroups = function (opts) {
         var params = {
             method:"Get"
         };
         $.extend(params, opts);
-        return app.getJsonData(contextPath + "/getRepositories.json", params);
+        return app.getJsonData(contextPath + "/googleGroups.json", params);
     };
 
-    app.getOrganizations = function () {
-        var params = {
-            method:"Get"
-        };
-        return app.getJsonData(contextPath + "/getOrganizations.json", params);
+    app.createContact = function(opts){
+        return app.getJsonData(contextPath + "/createContact.do", opts);
     };
+
+    app.createGroup = function(opts){
+        return app.getJsonData(contextPath + "/createGroup.do", opts);
+    };
+
 
 
     /**

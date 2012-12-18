@@ -13,58 +13,12 @@
         },
 
         events:{
-            "btap; .showEmails":function (event) {
+            "btap; .showContacts":function (event) {
                 $(event.currentTarget).closest("ul").find("li").removeClass("active");
                 $(event.currentTarget).closest("li").addClass("active");
-                var emails = app.getEmails();
+                var contacts = app.getContacts();
                 brite.display("DataTable", ".MainView-content", {
-                    gridData:emails,
-                    columnDef:[
-                        {
-                            text:"#",
-                            render: function(obj, idx){return idx + 1},
-                            attrs:"style='width: 20%'"
-                        },
-                        {
-                            text:"Emails",
-                            render:function(obj){return obj}
-
-                        }
-                    ],
-                    opts:{
-                        htmlIfEmpty: "GitHub not support get emails from api, don't know why"
-                    }
-                });
-            },
-            "btap; .showRepositories":function (event) {
-                var view = this;
-                $(event.currentTarget).closest("ul").find("li").removeClass("active");
-                $(event.currentTarget).closest("li").addClass("active");
-                showRepositories.call(this);
-
-            },
-            "btap; .MainView-content td.repoName": function(event) {
-                 var view = this;
-                 var $e = view.$el;
-                var repoName = $(event.currentTarget).closest("tr").attr("data-repoName");
-                var owner = $(event.currentTarget).closest("tr").attr("data-owner");
-                $e.find(".MainView-content").empty();
-                brite.display("RepositoryView", ".MainView-content", {repoName: repoName, owner: owner});
-            },
-            "btap; .showOrganizations":function (event) {
-                $(event.currentTarget).closest("ul").find("li").removeClass("active");
-                $(event.currentTarget).closest("li").addClass("active");
-
-                var repos = app.getOrganizations();
-                brite.display("DataTable", ".MainView-content", {
-                    gridData:repos,
-                    rowAttrs: function(obj, idx){
-                        if(obj!==true) {
-                            return " data-orgName='" + obj.login  + "'";
-                        }else{
-                            return "";
-                        }
-                    },
+                    gridData:contacts,
                     columnDef:[
                         {
                             text:"#",
@@ -72,91 +26,101 @@
                             attrs:"style='width: 10%'"
                         },
                         {
-                            text:"Name",
-                            propName:"login",
-                            attrs:"class='orgName' style='width: 20%;cursor:pointer'"
-                        },
-                        {
-                            text:"Location",
-                            propName:"location",
+                            text:"Emails",
+                            render:function(obj){return obj.email},
                             attrs:"style='width: 20%'"
+
                         },
                         {
-                            text:"Url",
-                            propName:"url"
+                            text:"Full Name",
+                            render:function(obj){return obj.fullName},
+                            attrs:"style='width: 25%'"
+                        },
+                        {
+                            text:"Group",
+                            render:function(obj){return getGroupId(obj.groupId)}
                         }
                     ],
                     opts:{
-                        htmlIfEmpty: "Not Organizations found",
-                        withCmdDelete: false,
-                        withPaging: false
+                        htmlIfEmpty: "Not contacts found",
+                        withPaging: false,
+                        cmdEdit: "EDIT_CONTACT",
+                        cmdDelete: "DELETE_CONTACT"
                     }
                 });
             },
-            "btap; .MainView-content td.orgName": function(event) {
+            "btap; .showGroups":function (event) {
                 var view = this;
-                var $e = view.$el;
-                var orgName = $(event.currentTarget).closest("tr").attr("data-orgName");
-                $e.find(".MainView-content").empty();
-                showRepositories({
-                   dataProvider: {list: function(opts){
-                       return app.getJsonData(contextPath + "/getOrgRepositories.json", $.extend({
-                           method: "get",
-                           orgName: orgName
-                       }, opts));
-                   }}
+                $(event.currentTarget).closest("ul").find("li").removeClass("active");
+                $(event.currentTarget).closest("li").addClass("active");
+                var groups = app.getGroups();
+                brite.display("DataTable", ".MainView-content", {
+                    rowAttrs: function(obj){return " data-groupId='" + obj.id + "'"},
+                    gridData: groups,
+                    columnDef:[
+                        {
+                            text:"#",
+                            render: function(obj, idx){return idx + 1},
+                            attrs:"style='width: 20%'"
+                        },
+                        {
+                            text:"Title",
+                            render:function(obj){return obj.title.text}
+
+                        }
+                    ],
+                    opts:{
+                        htmlIfEmpty: "Not Groups found",
+                        withPaging: false,
+                        cmdEdit: "EDIT_GROUP",
+                        cmdDelete: "DELETE_GROUP"
+                    }
                 });
+            },
+            "btap; .createGroup": function() {
+                brite.display("CreateGroup");
+            },
+            "btap; .createContact": function() {
+                brite.display("CreateContact");
             }
         },
 
         docEvents:{
+            "SHOW_GROUPS": function() {
+                var view = this;
+                var $e = view.$el;
+                $e.find(".showGroups").trigger("btap");
+            },
+            "SHOW_CONTACTS": function(){
+                var view = this;
+                view.$el.find(".showContacts").trigger("btap");
+            },
+            "EDIT_GROUP":function(event, extraData){
+                console.log("edit group");
+            },
+            "DELETE_GROUP": function(event, extraData){
+                console.log("DELETE GROUP");
+            },
+            "DELETE_CONTACT": function(event, extraData) {
+                console.log("DELETE CONTACT");
+            },
+            "EDIT_CONTACT": function(event, extraData){
+                console.log("EDIT CONTACT");
+            }
         },
 
         daoEvents:{
         }
     });
 
-    function showRepositories(data) {
-        var tableDefine = {
-            dataProvider: {list: app.getRepositories},
-            rowAttrs: function(obj, idx){
-                if(obj!==true) {
-                    return " data-repoName='" + obj.name + "' data-owner='" + obj.owner.login + "'";
-                }else{
-                    return "";
-                }
-            },
-            columnDef:[
-                {
-                    text:"#",
-                    render: function(obj, idx){return idx + 1},
-                    attrs:"style='width: 10%'"
-                },
-                {
-                    text:"Name",
-                    propName:"name",
-                    attrs:"class='repoName' style='width: 20%;cursor:pointer'"
-                },,
-                {
-                    text:"Owner",
-                    propName:"owner.login",
-                    attrs:" style='width: 20%;'"
-                },
-                {
-                    text:"Url",
-                    propName:"url",
-                    attrs:"style='width: 30%'"
-                },
-                {
-                    text:"Desc",
-                    propName:"description"
-                }
-            ],
-            opts:{
-                htmlIfEmpty: "Not repository found",
-                withCmdDelete: false
-            }
-        };
-        brite.display("DataTable", ".MainView-content", $.extend(tableDefine, data||{}));
+    function getGroupId(url) {
+        var myregexp = /http:\/\/www.google.com\/m8\/feeds\/groups\/(.+)\/base\/(.+)/;
+        var match = myregexp.exec(url);
+        if (match != null) {
+            result = match[2];
+        } else {
+            result = "";
+        }
+        return result;
     }
 })(jQuery);
