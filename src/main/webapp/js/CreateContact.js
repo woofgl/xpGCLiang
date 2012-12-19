@@ -6,13 +6,13 @@
      */
     (function ($) {
 
-        brite.registerView("CreateGroup", {
+        brite.registerView("CreateContact", {
             loadTmpl:true,
             parent:".MainView",
             emptyParent:false
         }, {
             create:function (data, config) {
-                var html = $("#tmpl-CreateGroup").render(data);
+                var html = $("#tmpl-CreateContact").render(data);
                 var $e = $(html);
                 return $e;
             },
@@ -32,14 +32,21 @@
                 var view = this;
                 var $e = this.$el;
                 var mainScreen = view.mainScreen;
-                var input = $e.find("input[name='name']");
+                var $controls = $e.find(".controls input,.controls textarea");
+                data = {};
+                $controls.each(function(idx, obj){
+                    var $this = $(this);
+                    data[$this.attr("name")] = $this.val();
+                });
+                console.log(data);
+                var input = $e.find("input[name='email']");
                 if (input.val() == "") {
                     input.focus();
-                    input.closest("div").addClass("error").find("span").html("Please enter valid group name.");
+                    input.closest("div").addClass("error").find("span").html("Please enter valid contact name.");
                 } else {
-                    app.createGroup({groupName: input.val()}).done(function (extraData) {
+                    app.createContact(data).done(function (extraData) {
                         setTimeout((function () {
-                            $("body").trigger("SHOW_GROUPS");
+                            $("body").trigger("SHOW_CONTACT");
                         }), 5000);
                         view.close();
                     });
@@ -48,7 +55,7 @@
             },
 
             events:{
-                "btap; .createGroupBtn":function () {
+                "btap; .createContactBtn":function () {
                     var view = this;
                     var $e = view.$el;
                     view.submit();

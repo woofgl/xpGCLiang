@@ -17,6 +17,7 @@ import org.scribe.oauth.OAuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +84,9 @@ public class GoogleAuthRequest implements AuthRequest {
             Verifier verifier = new Verifier(code);
             Token accessToken = googleService.getAccessToken(EMPTY_TOKEN, verifier);
             if (accessToken.getToken() != null) {
-                rc.setCookie(TOKEN, accessToken.getToken());
+                Cookie cookie = new Cookie(TOKEN, accessToken.getToken());
+                cookie.setMaxAge(-1);
+                rc.getRes().addCookie (cookie);
                 rc.getRes().sendRedirect(rc.getReq().getContextPath());
             }else{
                 googleLogin(rc);

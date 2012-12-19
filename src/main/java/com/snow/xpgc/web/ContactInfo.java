@@ -19,6 +19,8 @@ public class ContactInfo {
     private String groupId;
     private String email;
     private String notes;
+    private String id;
+    private String etag;
 
     public ContactInfo() {
     }
@@ -87,6 +89,22 @@ public class ContactInfo {
         this.notes = notes;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getEtag() {
+        return etag;
+    }
+
+    public void setEtag(String etag) {
+        this.etag = etag;
+    }
+
     public static ContactInfo from(ContactEntry entry) {
         ContactInfo info = new ContactInfo();
         Name name = entry.getName();
@@ -116,12 +134,19 @@ public class ContactInfo {
         if (content != null && content.getType() <= 5) {
             info.setNotes(entry.getTextContent().toString());
         }
+        if (entry.getId() != null) {
+            info.setId(entry.getId());
+        }
+        if (entry.getEtag() != null) {
+            info.setEtag(entry.getEtag());
+        }
 
         return info;
     }
 
     public ContactEntry to() {
         ContactEntry contactEntry = new ContactEntry();
+
         Name name = new Name();
         if (this.getFullName() != null) {
             name.setFullName(new FullName(this.getFullName(), null));
@@ -132,6 +157,7 @@ public class ContactInfo {
         if (this.getFamilyName() != null) {
             name.setFamilyName(new FamilyName(this.getFamilyName(), ""));
         }
+        contactEntry.setName(name);
         if (this.getNotes() != null) {
             contactEntry.setContent(new PlainTextConstruct(this.getNotes()));
         }
@@ -160,6 +186,12 @@ public class ContactInfo {
         if (this.getBir() != null) {
             Birthday b = new Birthday(this.getBir());
             contactEntry.setBirthday(b);
+        }
+        if (this.getId() != null) {
+            contactEntry.setId(this.getId());
+        }
+        if (this.getEtag() != null) {
+            contactEntry.setEtag(getEtag());
         }
         return contactEntry;
     }

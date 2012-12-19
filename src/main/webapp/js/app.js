@@ -82,12 +82,20 @@ var app = app || {};
         return app.getJsonData(contextPath + "/googleGroups.json", params);
     };
 
-    app.createContact = function(opts){
-        return app.getJsonData(contextPath + "/createContact.do", opts);
+    app.createContact = function(contact){
+        return app.getJsonData(contextPath + "/createContact.do", contact);
     };
 
     app.createGroup = function(opts){
         return app.getJsonData(contextPath + "/createGroup.do", opts);
+    };
+    app.deleteGroup = function(groupId, etag){
+        var params = {"groupId":groupId, etag: etag};
+        return app.getJsonData(contextPath + "/deleteGroup.do", params);
+    };
+    app.deleteContact = function(contactId, etag){
+        var params = {"contactId":contactId, etag: etag};
+        return app.getJsonData(contextPath + "/deleteContact.do", params);
     };
 
 
@@ -278,5 +286,35 @@ var app = app || {};
 
     });
 
+})(jQuery);
+
+(function ($) {
+    //add format to string
+    String.prototype.format = function (args) {
+        if (arguments.length > 0) {
+            var result = this;
+            if (arguments.length == 1 && typeof (args) == "object") {
+                for (var key in args) {
+                    var reg = new RegExp("({" + key + "})", "g");
+                    result = result.replace(reg, args[key]);
+                }
+            }
+            else {
+                for (var i = 0; i < arguments.length; i++) {
+                    if (arguments[i] == undefined) {
+                        return "";
+                    }
+                    else {
+                        var reg = new RegExp("({[" + i + "]})", "g");
+                        result = result.replace(reg, arguments[i]);
+                    }
+                }
+            }
+            return result;
+        }
+        else {
+            return this;
+        }
+    };
 })(jQuery);
 

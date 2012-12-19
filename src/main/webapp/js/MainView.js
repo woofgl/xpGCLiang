@@ -19,6 +19,7 @@
                 var contacts = app.getContacts();
                 brite.display("DataTable", ".MainView-content", {
                     gridData:contacts,
+                    rowAttrs: function(obj){ return " etag='{0}'".format(obj.etag)},
                     columnDef:[
                         {
                             text:"#",
@@ -55,8 +56,8 @@
                 $(event.currentTarget).closest("li").addClass("active");
                 var groups = app.getGroups();
                 brite.display("DataTable", ".MainView-content", {
-                    rowAttrs: function(obj){return " data-groupId='" + obj.id + "'"},
                     gridData: groups,
+                    rowAttrs: function(obj){ return " etag='{0}'".format(obj.etag)},
                     columnDef:[
                         {
                             text:"#",
@@ -99,10 +100,32 @@
                 console.log("edit group");
             },
             "DELETE_GROUP": function(event, extraData){
-                console.log("DELETE GROUP");
+                if (extraData && extraData.objId) {
+                    var groupId = getGroupId(extraData.objId);
+                    var etag = $(extraData.event.currentTarget).closest("tr").attr("etag");
+                    app.deleteGroup(groupId, etag).done(function (extradata) {
+                        if (extradata && extradata.result) {
+                            setTimeout((function () {
+                                $("body").trigger("SHOW_GROUPS");
+                            }), 3000);
+
+                        }
+                    });
+                }
             },
             "DELETE_CONTACT": function(event, extraData) {
-                console.log("DELETE CONTACT");
+                if (extraData && extraData.objId) {
+                    var contactId = getContactId(extraData.objId);
+                    var etag = $(extraData.event.currentTarget).closest("tr").attr("etag");
+                    app.deleteContact(contactId, etag).done(function (extradata) {
+                        if (extradata && extradata.result) {
+                            setTimeout((function () {
+                                $("body").trigger("SHOW_CONTACTS");
+                            }), 3000);
+
+                        }
+                    });
+                }
             },
             "EDIT_CONTACT": function(event, extraData){
                 console.log("EDIT CONTACT");
@@ -115,6 +138,16 @@
 
     function getGroupId(url) {
         var myregexp = /http:\/\/www.google.com\/m8\/feeds\/groups\/(.+)\/base\/(.+)/;
+        var match = myregexp.exec(url);
+        if (match != null) {
+            result = match[2];
+        } else {
+            result = "";
+        }
+        return result;
+    }
+    function getContactId(url) {
+        var myregexp = /http:\/\/www.google.com\/m8\/feeds\/contacts\/(.+)\/base\/(.+)/;
         var match = myregexp.exec(url);
         if (match != null) {
             result = match[2];

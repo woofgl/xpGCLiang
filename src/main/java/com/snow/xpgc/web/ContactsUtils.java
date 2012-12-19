@@ -144,53 +144,20 @@ public class ContactsUtils {
 
     public ContactEntry createContact(ContactInfo contact)
             throws ServiceException, IOException {
-        ContactEntry contactEntry = new ContactEntry();
-        Name name = new Name();
-        if (contact.getFullName() != null) {
-            name.setFullName(new FullName(contact.getFullName(), null));
-        }
-        if (contact.getGivenName() != null) {
-            name.setGivenName(new GivenName(contact.getGivenName(), null));
-        }
-        if (contact.getFamilyName() != null) {
-            name.setFamilyName(new FamilyName(contact.getFamilyName(), ""));
-        }
-        if (contact.getNotes() != null) {
-            contactEntry.setContent(new PlainTextConstruct(contact.getNotes()));
-        }
-        //set email
-        if (contact.getEmail() != null) {
-            Email primaryMail = new Email();
-            primaryMail.setAddress(contact.getEmail());
-            primaryMail.setRel("http://schemas.google.com/g/2005#home");
-            primaryMail.setPrimary(true);
-            contactEntry.addEmailAddress(primaryMail);
-        }
-
-        if (contact.getPhone() != null) {
-            PhoneNumber pn = new PhoneNumber();
-            pn.setPhoneNumber(contact.getPhone());
-            pn.setPrimary(true);
-            pn.setRel("http://schemas.google.com/g/2005#work");
-            contactEntry.addPhoneNumber(pn);
-        }
-        //Add to a Group
-        if (contact.getGroupId() != null) {
-            GroupMembershipInfo gm = new GroupMembershipInfo();
-            gm.setHref(contact.getGroupId());
-            contactEntry.addGroupMembershipInfo(gm);
-        }
-        if (contact.getBir() != null) {
-            Birthday b = new Birthday(contact.getBir());
-            contactEntry.setBirthday(b);
-        }
-
-
-        //Add process
+        ContactEntry contactEntry = contact.to();
+         //Add process
         URL postUrl = new URL(BASE_CONTACTS_URL);
         return contactsService.insert(postUrl, contactEntry);
 
     }
 
 
+    public void deleteGroup(String groupId, String etag) throws IOException, ServiceException {
+        String url = String.format("%s/%s", BASE_GROUP_URL, groupId);
+        contactsService.delete(new URL(url), etag);
+    }
+    public void deleteContact(String contactId, String etag) throws IOException, ServiceException {
+        String url = String.format("%s/%s", BASE_CONTACTS_URL, contactId);
+        contactsService.delete(new URL(url), etag);
+    }
 }

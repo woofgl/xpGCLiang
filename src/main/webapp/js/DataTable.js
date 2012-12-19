@@ -6,6 +6,7 @@
      * @param {Object} data {
      *         dataType {String} Object Type
      *         rowAttrs   {String} row attris
+     *         idKey         {string} key of rowid, default is id
      *         onDone  {function} when data load
      *         columnDef    {Object[]} {
      *             text     {String} The Text to be displayed in column header
@@ -42,6 +43,11 @@
 
                 view.dataType = data.dataType;
                 view.rowAttrs = data.rowAttrs;
+                if(data.idKey) {
+                    view.idKey = data.idKey;
+                }else{
+                    view.idKey = "id";
+                }
                 if(data.onDone && $.isFunction(data.onDone)){
                     view.onDone = data.onDone;
                 }
@@ -169,10 +175,10 @@
                     var view = this;
                     var $e= view.$element;
                     $target = $(event.currentTarget);
-                    var event = $target.attr("data-cmd");
+                    var eventName = $target.attr("data-cmd");
 
                     var objId = $target.closest("tr").attr("data-obj_id");
-                    $e.trigger(event, {objType:view.dataType, objId: objId});
+                    $e.trigger(eventName, {objType:view.dataType, objId: objId, event:event});
 
                 },
                 "btap; div.icon-edit": function(event){
@@ -357,7 +363,10 @@
             }
 
             if (dataType) {
-                html += "data-obj_type='" + dataType + "' data-obj_id='" + obj.id + "'";
+                html += "data-obj_type='" + dataType + "'";
+            }
+            if(obj[view.idKey]) {
+                html += " data-obj_id='" + obj[view.idKey] + "'";
             }
             html += ">";
 

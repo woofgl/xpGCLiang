@@ -9,10 +9,12 @@ import com.britesnow.snow.web.param.annotation.WebParam;
 import com.britesnow.snow.web.param.annotation.WebUser;
 import com.google.gdata.data.contacts.ContactEntry;
 import com.google.gdata.data.contacts.ContactGroupEntry;
+import com.google.gdata.util.ServiceException;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +69,25 @@ public class GoogleWebHandlers {
         m.put("token", token);
     }
 
+    @WebActionHandler(name = "createContact")
+    public Map createContact(@WebUser String token, @WebObject ContactInfo contact) {
+        Map map = new HashMap();
+        boolean result = true;
+        if (token == null) {
+            result = false;
+        } else {
+            contactsUtils.setToken(token);
+            try {
+                contactsUtils.createContact(contact);
+            } catch (Exception e) {
+                log.warn("create contact fail", e);
+                result = false;
+            }
+        }
+
+        map.put("result", result);
+        return map;
+    }
     @WebActionHandler(name = "createGroup")
     public Map createGroup(@WebUser String token, @WebParam("groupName") String groupName) {
         Map map = new HashMap();
@@ -83,6 +104,39 @@ public class GoogleWebHandlers {
             }
         }
 
+        map.put("result", result);
+        return map;
+    }
+
+    @WebActionHandler(name="deleteGroup")
+    public Map deleteGroup(@WebUser String token, @WebParam("groupId") String groupId, @WebParam("etag") String etag)  {
+        boolean result = false;
+        if (token != null) {
+            try {
+                contactsUtils.setToken(token);
+                contactsUtils.deleteGroup(groupId, etag);
+                result = true;
+            } catch (Exception e) {
+                log.warn(String.format("delete group %s fail", groupId), e);
+            }
+        }
+        Map map = new HashMap();
+        map.put("result", result);
+        return map;
+    }
+    @WebActionHandler(name="deleteContact")
+    public Map deleteContact(@WebUser String token, @WebParam("contactId") String contactId, @WebParam("etag") String etag)  {
+        boolean result = false;
+        if (token != null) {
+            try {
+                contactsUtils.setToken(token);
+                contactsUtils.deleteContact(contactId, etag);
+                result = true;
+            } catch (Exception e) {
+                log.warn(String.format("delete contact %s fail", contactId), e);
+            }
+        }
+        Map map = new HashMap();
         map.put("result", result);
         return map;
     }
