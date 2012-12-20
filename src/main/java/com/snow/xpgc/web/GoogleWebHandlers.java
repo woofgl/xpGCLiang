@@ -78,7 +78,12 @@ public class GoogleWebHandlers {
         } else {
             contactsUtils.setToken(token);
             try {
-                contactsUtils.createContact(contact);
+                if (contact.getId() == null) {
+                    contactsUtils.createContact(contact);
+                }else{
+                    contactsUtils.updateContactEntry(contact);
+                }
+
             } catch (Exception e) {
                 log.warn("create contact fail", e);
                 result = false;
@@ -89,7 +94,8 @@ public class GoogleWebHandlers {
         return map;
     }
     @WebActionHandler(name = "createGroup")
-    public Map createGroup(@WebUser String token, @WebParam("groupName") String groupName) {
+    public Map createGroup(@WebUser String token,@WebParam("groupId") String groupId,
+                           @WebParam("groupName") String groupName, @WebParam("etag") String etag) {
         Map map = new HashMap();
         boolean result = true;
         if (token == null) {
@@ -97,7 +103,14 @@ public class GoogleWebHandlers {
         } else {
             contactsUtils.setToken(token);
             try {
-                contactsUtils.createContactGroupEntry(groupName);
+                if (groupId == null) {
+                    //create group
+                    contactsUtils.createContactGroupEntry(groupName);
+                }else {
+                    //update group
+                    contactsUtils.updateContactGroupEntry(groupId, etag,groupName);
+                }
+
             } catch (Exception e) {
                 log.warn(String.format("create Group %s fail", groupName), e);
                 result = false;
@@ -139,5 +152,20 @@ public class GoogleWebHandlers {
         Map map = new HashMap();
         map.put("result", result);
         return map;
+    }
+
+    @WebModelHandler(startsWith = "/getContact")
+    public void getContact(@WebUser String token, @WebParam("contactId") String contactId,
+                           @WebParam("etag") String etag, @WebModel Map m) {
+        if (token != null && contactId !=null) {
+            try {
+                contactsUtils.setToken(token);
+                ContactEntry entry = contactsUtils.getContactEntry(contactId);
+                m.put("result", ContactInfo.from(entry));
+            } catch (Exception e) {
+                log.warn(String.format("get contact %s fail", contactId), e);
+                m.put("result", false);
+            }
+        }
     }
 }

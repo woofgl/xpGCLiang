@@ -12,7 +12,10 @@
             emptyParent:false
         }, {
             create:function (data, config) {
-                var html = $("#tmpl-CreateContact").render(data);
+                if(data) {
+                    this.id = data.id;
+                }
+                var html = $("#tmpl-CreateContact").render(data||{});
                 var $e = $(html);
                 return $e;
             },
@@ -39,6 +42,7 @@
                     data[$this.attr("name")] = $this.val();
                 });
                 console.log(data);
+                data.id = view.id;
                 var input = $e.find("input[name='email']");
                 if (input.val() == "") {
                     input.focus();
@@ -46,7 +50,7 @@
                 } else {
                     app.createContact(data).done(function (extraData) {
                         setTimeout((function () {
-                            $("body").trigger("SHOW_CONTACT");
+                            $("body").trigger("SHOW_CONTACTS");
                         }), 5000);
                         view.close();
                     });

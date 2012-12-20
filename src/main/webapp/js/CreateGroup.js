@@ -12,7 +12,14 @@
             emptyParent:false
         }, {
             create:function (data, config) {
-                var html = $("#tmpl-CreateGroup").render(data);
+                console.log(data);
+                if(data) {
+                    this.groupId = data.groupId;
+                    this.etag = data.etag;
+                }
+                console.log("create group");
+                var html = $("#tmpl-CreateGroup").render(data||{});
+                console.log(html);
                 var $e = $(html);
                 return $e;
             },
@@ -32,12 +39,18 @@
                 var view = this;
                 var $e = this.$el;
                 var mainScreen = view.mainScreen;
+                var dfd;
                 var input = $e.find("input[name='name']");
                 if (input.val() == "") {
                     input.focus();
                     input.closest("div").addClass("error").find("span").html("Please enter valid group name.");
                 } else {
-                    app.createGroup({groupName: input.val()}).done(function (extraData) {
+                    if(view.groupId) {
+                        dfd = app.createGroup({groupId:view.groupId,etag:view.etag, groupName: input.val()})
+                    }else{
+                        dfd = app.createGroup({groupName: input.val()});
+                    }
+                    dfd.done(function (extraData) {
                         setTimeout((function () {
                             $("body").trigger("SHOW_GROUPS");
                         }), 5000);

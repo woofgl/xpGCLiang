@@ -132,7 +132,7 @@ public class ContactInfo {
         }
         Content content = entry.getContent();
         if (content != null && content.getType() <= 5) {
-            info.setNotes(entry.getTextContent().toString());
+            info.setNotes(entry.getTextContent().getContent().getPlainText());
         }
         if (entry.getId() != null) {
             info.setId(entry.getId());

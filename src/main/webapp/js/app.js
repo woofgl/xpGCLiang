@@ -67,11 +67,11 @@ var app = app || {};
         return dfd.promise();
     };
 
-    app.getContacts = function () {
+    app.getContacts = function (opts) {
         var params = {
             method:"Get"
         };
-        return app.getJsonData(contextPath + "/googleContacts.json", params);
+        return app.getJsonData(contextPath + "/googleContacts.json", $.extend(params, opts||{}));
     };
 
     app.getGroups = function (opts) {
@@ -97,6 +97,12 @@ var app = app || {};
         var params = {"contactId":contactId, etag: etag};
         return app.getJsonData(contextPath + "/deleteContact.do", params);
     };
+    app.getContact = function(opts){
+        var params = opts||{};
+        params.method = "Get";
+        return app.getJsonData(contextPath + "/getContact.json", params);
+    }
+
 
 
 

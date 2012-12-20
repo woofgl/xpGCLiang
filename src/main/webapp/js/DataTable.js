@@ -181,10 +181,12 @@
                     $e.trigger(eventName, {objType:view.dataType, objId: objId, event:event});
 
                 },
-                "btap; div.icon-edit": function(event){
+                "cmdDelete": function(event, extra){
                     var view = this;
-                    var objId = $(event.currentTarget).closest("tr").attr("data-obj_id");
-                    $("body").trigger("cmdEdit", {objType: view.dataType, objId: objId});
+                    if (extra) {
+                        var objId = extra.objId;
+                        $("body").trigger("cmdEdit", {objType: view.dataType, objId: objId});
+                    }
                 },
                 "cmdDelete": function(event, extra){
                     var view = this;

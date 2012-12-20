@@ -67,10 +67,11 @@ public class ContactsUtils {
 
 
     public List<ContactEntry> getGroupContactResults(String groupId) throws ServiceException, IOException {
-        URL feedUrl = new URL(BASE_GROUP_URL);
+        URL feedUrl = new URL(BASE_CONTACTS_URL);
         ContactQuery myQuery = new ContactQuery(feedUrl);
-//        myQuery.setStringCustomParameter("group", groupId);
-        myQuery.setGroup(groupId);
+        myQuery.setStringCustomParameter("group", groupId);
+//       myQuery.setGroup(String.format(BASE_GROUP_URL + "/" + groupId).replace("full","base"));
+//        myQuery.setGroup("https://www.google.com/m8/feeds/groups/woofgl%40gmail.com/base/6");
         ContactFeed resultFeed = contactsService.query(myQuery, ContactFeed.class);
         return resultFeed.getEntries();
     }
@@ -159,5 +160,17 @@ public class ContactsUtils {
     public void deleteContact(String contactId, String etag) throws IOException, ServiceException {
         String url = String.format("%s/%s", BASE_CONTACTS_URL, contactId);
         contactsService.delete(new URL(url), etag);
+    }
+
+    public void updateContactGroupEntry(String groupId, String etag, String groupName) throws IOException, ServiceException {
+        String url = String.format("%s/%s", BASE_GROUP_URL, groupId);
+        ContactGroupEntry group = new ContactGroupEntry();
+        group.setTitle(new PlainTextConstruct(groupName));
+        contactsService.update(new URL(url), group, etag);
+    }
+
+    public void updateContactEntry(ContactInfo contact) throws IOException, ServiceException {
+        String url = String.format("%s/%s", BASE_CONTACTS_URL, contact.getId());
+        contactsService.update(new URL(url), contact.to());
     }
 }

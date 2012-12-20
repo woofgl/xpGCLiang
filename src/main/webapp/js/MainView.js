@@ -13,10 +13,11 @@
         },
 
         events:{
-            "btap; .showContacts":function (event) {
+            "btap; .showContacts":function (event, extra) {
+                console.log(extra);
                 $(event.currentTarget).closest("ul").find("li").removeClass("active");
                 $(event.currentTarget).closest("li").addClass("active");
-                var contacts = app.getContacts();
+                var contacts = app.getContacts(extra);
                 brite.display("DataTable", ".MainView-content", {
                     gridData:contacts,
                     rowAttrs: function(obj){ return " etag='{0}'".format(obj.etag)},
@@ -29,7 +30,7 @@
                         {
                             text:"Emails",
                             render:function(obj){return obj.email},
-                            attrs:"style='width: 20%'"
+                            attrs:"style='width: 400px'"
 
                         },
                         {
@@ -57,16 +58,22 @@
                 var groups = app.getGroups();
                 brite.display("DataTable", ".MainView-content", {
                     gridData: groups,
-                    rowAttrs: function(obj){ return " etag='{0}'".format(obj.etag)},
+                    rowAttrs: function(obj){ return "data-type='Group' data-etag='{0}' data-title='{1}'".format(obj.etag, obj.title.text)},
                     columnDef:[
                         {
                             text:"#",
                             render: function(obj, idx){return idx + 1},
-                            attrs:"style='width: 20%'"
+                            attrs:"style='width: 10%'"
                         },
                         {
                             text:"Title",
+                            attrs: " data-cmd='SHOW_CONTACTS' style='cursor:pointer;width:40%' ",
                             render:function(obj){return obj.title.text}
+
+                        },
+                        {
+                            text:"Etag",
+                            render:function(obj){return obj.etag}
 
                         }
                     ],
@@ -92,17 +99,28 @@
                 var $e = view.$el;
                 $e.find(".showGroups").trigger("btap");
             },
-            "SHOW_CONTACTS": function(){
+            "SHOW_CONTACTS": function(event, extra){
+                var groupId = (extra||{}).objId;
+                if(groupId) {
+                    groupId = groupId;
+                }
                 var view = this;
-                view.$el.find(".showContacts").trigger("btap");
+                view.$el.find(".showContacts").trigger("btap",{groupId:groupId});
             },
             "EDIT_GROUP":function(event, extraData){
-                console.log("edit group");
+                if (extraData && extraData.objId) {
+                    var groupId = getGroupId(extraData.objId);
+                    var $row = $(extraData.event.currentTarget).closest("tr");
+                    var title = $row.attr("data-title");
+                    var etag = $row.attr("data-etag");
+                    console.log(etag);
+                    brite.display("CreateGroup", null, {groupId:groupId, title:title, etag:etag})
+                }
             },
             "DELETE_GROUP": function(event, extraData){
                 if (extraData && extraData.objId) {
                     var groupId = getGroupId(extraData.objId);
-                    var etag = $(extraData.event.currentTarget).closest("tr").attr("etag");
+                    var etag = $(extraData.event.currentTarget).closest("tr").attr("data-etag");
                     app.deleteGroup(groupId, etag).done(function (extradata) {
                         if (extradata && extradata.result) {
                             setTimeout((function () {
@@ -126,9 +144,23 @@
                         }
                     });
                 }
+
             },
             "EDIT_CONTACT": function(event, extraData){
-                console.log("EDIT CONTACT");
+                if (extraData && extraData.objId) {
+                    var contactId = getContactId(extraData.objId);
+
+                    var etag = $(extraData.event.currentTarget).closest("tr").attr("etag");
+
+                    app.getContact({contactId:contactId, etag:etag}).done(function (data) {
+                        if(data && data.result){
+                            if(data.result.id) {
+                                data.result.id = getContactId(data.result.id);
+                            }
+                            brite.display("CreateContact", null, data.result);
+                        }
+                    });
+                }
             }
         },
 
